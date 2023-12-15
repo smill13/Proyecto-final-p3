@@ -1,0 +1,11 @@
+.image-link {
+    display: block;
+    position: relative;
+    overflow: hidden;
+}
+
+.image-link :hover {
+    pointer-events: none;
+    visibility: hidden;
+}
+
