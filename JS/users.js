@@ -1,52 +1,49 @@
-// Array para almacenar usuarios durante la sesión
-const users = [];
+document.addEventListener('DOMContentLoaded', () => {
+    const isPasswordSecure = password => /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(password);
 
-// Expresion lambda para validar la fortaleza de la contraseña
-const isPasswordSecure = password => /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(password);
-
-// Función para añadir un usuario
-function addUser() {
-    const usernameInput = document.getElementById('username');
+    const form = document.getElementById('userForm');
+    const username = document.getElementById('username');
     const passwordInput = document.getElementById('password');
+    const gmailInput = document.getElementById('Gmail');
 
-    const username = usernameInput.value.trim();
-    const password = passwordInput.value.trim();
+    form.addEventListener('submit', (event) => {
+        event.preventDefault(); // Evita el comportamiento predeterminado del formulario (recargar la página)
 
-    // Verificar si el nombre de usuario ya existe
-    if (users.some(user => user.username === username)) {
-        alert('Este nombre de usuario ya está en uso. Por favor, elige otro.');
-        return;
-    }
+        const apiUrl = `https://localhost:7185/api/Clientes/CrearObjeto`;
 
-    // Validar la fortaleza de la contraseña
-    if (!isPasswordSecure(password)) {
-        alert('La contraseña es débil. Asegúrate de que tenga al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales.');
-        return;
-    }
+        const password = passwordInput.value.trim();
 
-    // Añadir usuario al array
-    const newUser = { username, password };
-    users.push(newUser);
+        // Validar la fortaleza de la contraseña
+        if (!isPasswordSecure(password)) {
+            alert('La contraseña es débil. Asegúrate de que tenga al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales.');
+            return;
+        }
 
-    // Limpiar campos de entrada
-    usernameInput.value = '';
-    passwordInput.value = '';
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                clienteId: 0,
+                nombre: username.value.trim(),
+                gmail: gmailInput.value.trim(),
+                contraseña: password,
+            }),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    // Manejar errores específicos aquí
+                    alert('La solicitud no fue exitosa.\n Código de estado: ' + response.status);
+                   }
+                return response.json(); // Se espera una respuesta JSON
+            })
 
-    // Actualizar la lista de usuarios en la página
-    updateUsersList();
-}
-
-// Función para actualizar la lista de usuarios en la página
-function updateUsersList() {
-    const userList = document.getElementById('userList');
-
-    // Limpiar la lista antes de actualizar
-    userList.innerHTML = '';
-
-    // Crear elementos de lista para cada usuario
-    users.forEach(user => {
-        const listItem = document.createElement('li');
-        listItem.textContent = `Usuario: ${user.username}, Contraseña: ${user.password}`;
-        userList.appendChild(listItem);
+            .then((data) => {
+                // Aquí puedes realizar cualquier acción que desees con los datos de la respuesta
+                console.log('Respuesta API:', data);
+                alert('Usuario registrado correctamente');
+                // Por ejemplo, puedes mostrar una alerta con el mensaje de éxito o hacer algo más con la respuesta.
+            })
     });
-}
+});
